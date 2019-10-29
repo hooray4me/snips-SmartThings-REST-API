@@ -1,0 +1,1 @@
+# snips-SmartThings-REST-API
