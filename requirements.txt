@@ -1,3 +1,1 @@
-hermes-python>=0.3.2
-future==0.16
-requests
+hermes-python>=0.8

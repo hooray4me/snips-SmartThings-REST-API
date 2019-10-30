@@ -1,72 +1,64 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3.7
 
-import ConfigParser
+from snipsTools import SnipsConfigParser
 from hermes_python.hermes import Hermes
-from hermes_python.ffi.utils import MqttOptions
 from hermes_python.ontology import *
 import io
+import requests
 
-CONFIGURATION_ENCODING_FORMAT = "utf-8"
 CONFIG_INI = "config.ini"
 
-class SnipsConfigParser(ConfigParser.SafeConfigParser):
-    def to_dict(self):
-        return {section : {option_name : option for option_name, option in self.items(section)} for section in self.sections()}
+MQTT_IP_ADDR: str = "localhost"
+MQTT_PORT: int = 1883
+MQTT_ADDR: str = "{}:{}".format(MQTT_IP_ADDR, str(MQTT_PORT))
 
-def read_configuration_file(configuration_file):
-    try:
-        with io.open(configuration_file, encoding=CONFIGURATION_ENCODING_FORMAT) as f:
-            conf_parser = SnipsConfigParser()
-            conf_parser.readfp(f)
-            return conf_parser.to_dict()
-    except (IOError, ConfigParser.Error) as e:
-        return dict()
+class Lights:
 
-def subscribe_intent_callback(hermes, intentMessage):
-    conf = read_configuration_file(CONFIG_INI)
-    action_wrapper(hermes, intentMessage, conf)
+    def __init__(self):
+        try:
+            self.config = SnipsConfigParser.read_configuration_file(CONFIG_INI)
+        except Exception:
+            self.config = None
 
+        self.start_blocking()
 
-def action_wrapper(hermes, intentMessage, conf):
-    from requests import post, get
-    import json
+    def controlDevice_callback(self, hermes, intent_message):
+        
+        if intent_message.slots.lights:
+            light = intent_message.slots.lights.first().value
+        if intent_message.slots.onOff:
+            action = intent_message.slots.onOff.first().value
+        token = self.config.get("secret").get("bearer-auth-token")
+        api = self.config.get("secret").get("rest-api-url")
+        auth = 'Bearer ' + token.encode("utf-8")
+        header = {'Authorization': auth, 'Content-Type': 'application/json'}
+        DeviceIDs = ['09b0803c-cfe3-4b8a-8fc0-e8161701ade4', '2537cac5-2c28-454f-bdc2-5741ae4c44c4',  '7c792f42-a018-4664-af72-d41cf93b49df', '1d9b3329-4d6f-493d-baac-1ee84cec75e8', '5d5a7635-f1a5-40ac-ad1f-d75967545824']
 
-    current_session_id = intentMessage.session_id
-    try:
-     if len(intentMessage.slots.state) > 0:
-        myState = intentMessage.slots.state.first().value
-        theIntent = intentMessage.slots.state.first().value
-     if len(intentMessage.slots.device_name) > 0:
-        myDeviceId = intentMessage.slots.device_name.first().value
-     mytoken = conf['secret']['bearer-auth-token']
-     myapi = conf['secret']['rest-api-url']
-     auth = 'Bearer ' + key.encode("utf-8")
-     header = {'Authorization': auth, 'Content-Type': 'application/json'}
-     DeviceIDs = ['09b0803c-cfe3-4b8a-8fc0-e8161701ade4', '2537cac5-2c28-454f-bdc2-5741ae4c44c4',  '7c792f42-a018-4664-af72-d41cf93b49df', '1d9b3329-4d6f-493d-baac-1ee84cec75e8', '5d5a7635-f1a5-40ac-ad1f-d75967545824']
-     print header
-     print myState
-     print myDeviceId
-     if myDeviceId == "lights":
-       theTarget = "all_lights"
-     if myDeviceId == "lamps":
-       theTarget = "lamps"
-     else:
-       theTarget = "one_light"
-     if theTarget == "all_lights":
-       if myState == "on" or myState == "off":
-         for index in range(len(DeviceIDs)):
-           uri=myapi.encode("utf-8") + '/device/' + DeviceIDs[index] + '/command/' +myState.encode("utf-8")
-           response = get(uri, headers=header)
-         hermes.publish_end_session(current_session_id, "Turning " + myState.encode("utf-8") + " " + myDeviceId.encode("utf-8"))
-     else:
-       hermes.publish_end_session(current_session_id, "Be boop be be boop, something has gone terribly wrong")
-    except:
-      hermes.publish_end_session(current_session_id, "Be boop be be boop, something has gone terribly wrong")
+        if light == "lights":
+            target = "all_lights"
+        elif light == "lamps"
+            target = "lamps"
+        else
+            target == "one_light"
+        if target == "all_lights":
+            if action == "on" or action == "off":
+                for index in range(len(DeviceIDs)):
+                    uri=api.encode("utf-8") + '/device/' + DeviceIDs[index] + '/command/' + action.encode("utf-8")
+                    print url
+                    print header
+                    response = get(uri, headers=header)
+                hermes.publish_end_session(intent_message.session_id, "Turning " + action.encode("utf-8") + " " + light.encode("utf-8"))
+        else
+            hermes.publish_end_session(intent_message.session_id, "Be boop be be boop, somethings not right")
+       
+    def master_intent_callback(self,hermes, intent_message):
+        coming_intent = intent_message.intent.intent_name
+        if coming_intent == 'hooray4me:powerToggleDevice':
+            self.controlDevice_callback(hermes, intent_message)
+
+    def start_blocking(self):
+        with Hermes(MQTT_ADDR) as h:
+            h.subscribe_intents(self.master_intent_callback).start()
 
 if __name__ == "__main__":
-    mqtt_opts = MqttOptions()
-#    with Hermes(mqtt_options=mqtt_opts) as h:
-    with Hermes("localhost:1883") as h:
-        h.subscribe_intent("hooray4me:powerToggleDevice", subscribe_intent_callback) \
-         .start()
+    Lights()
