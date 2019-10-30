@@ -1,22 +1,35 @@
-#!/usr/bin/env bash
-set -e
+#/usr/bin/env bash -e
 
-if [ ! -e "./config.ini" ]; then
+# Copy config.ini.default if config.ini doesn't exist.
+if [ ! -e config.ini ]
+then
     cp config.ini.default config.ini
 fi
 
+PYTHON=`which python3`
 VENV=venv
 
-if [ ! -d $VENV ]; then
-    PYTHON=`which python3.7`
+if [ -f "$PYTHON" ]
+then
 
-    if [ -f $PYTHON ]; then
-        virtualenv -p $PYTHON $VENV
+    if [ ! -d $VENV ]
+    then
+        # Create a virtual environment if it doesn't exist.
+        $PYTHON -m venv $VENV
     else
-        echo "could not find python3.7"
+        if [ -e $VENV/bin/python2 ]
+        then
+            # If a Python2 environment exists, delete it first
+            # before creating a new Python 3 virtual environment.
+            rm -r $VENV
+            $PYTHON -m venv $VENV
+        fi
     fi
+
+    # Activate the virtual environment and install requirements.
+    . $VENV/bin/activate
+    pip3 install -r requirements.txt
+
+else
+    >&2 echo "Cannot find Python 3. Please install it."
 fi
-
-. $VENV/bin/activate
-
-pip3 install -r requirements.txt
