@@ -27,17 +27,17 @@ def subscribe_intent_callback(hermes, intentMessage):
     conf = read_configuration_file(CONFIG_INI)
     action_wrapper(hermes, intentMessage, conf)
 
-def call_command_api(api, header, device, cmd):
-    from requests import put
-    import json
-
-    a=api
-    b=header
-    c=device
-    d=cmd
-    url=a.encode("utf-8") + '/device/' + c.encode("utf-8") + '/command/' + d.encode("utf-8"))
-    response = get(url, headers=b)
-
+#def call_command_api(api, header, device, cmd):
+#    from requests import put
+#    import json
+#
+#    api = 
+#    b=header
+#    c=device
+#    d=cmd
+#    url=a.encode("utf-8") + '/device/' + c.encode("utf-8") + '/command/' + d.encode("utf-8"))
+#    response = get(url, headers=b)
+#
 #def call_attribute_api(api, header, device, cmd):
 #    from requests import get
 #    import json
@@ -74,7 +74,8 @@ def action_wrapper(hermes, intentMessage, conf):
      if theTarget == "all_lights":
        if myState == "on" or myState == "off":
          for index in range(len(DeviceIDs)):
-           call_command_api(myapi.encode("utf-8"), header.encode("utf-8"), DeviceIDs[index], myState.encode("utf-8"))
+           uri=myapi.encode("utf-8") + '/device/' + DeviceIDs[index] + '/command/' +myState.encode("utf-8")
+           response = get(uri, headers=header)
          hermes.publish_end_session(current_session_id, "Turning " + myState.encode("utf-8") + " " + myDeviceId.encode("utf-8"))
 #     if myState != "query":
 #       url = 'http://'+ myip.encode("utf-8") + ':' + myport.encode("utf-8") + '/api/states/' + theDevice
