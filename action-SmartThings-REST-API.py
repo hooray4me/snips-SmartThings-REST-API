@@ -30,15 +30,20 @@ def subscribe_intent_callback(hermes, intentMessage):
 def call_command_api(api, header, device, cmd):
     from requests import put
     import json
-    url = api.encode("utf-8") + '/device/' + device.encode("utf-8") + '/command/' + cmd.encode("utf-8"))
-    response = get(url, headers=header)
 
-def call_attribute_api(api, header, device, cmd):
-    from requests import get
-    import json
-    url = api.encode("utf-8") + '/device/' + device.encode("utf-8") + '/attribute/' + cmd.encode("utf-8"))
-    response = get(url, headers=header)
-    return response
+    a=api
+    b=header
+    c=device
+    d=cmd
+    url=a.encode("utf-8") + '/device/' + c.encode("utf-8") + '/command/' + d.encode("utf-8"))
+    response = get(url, headers=b)
+
+#def call_attribute_api(api, header, device, cmd):
+#    from requests import get
+#    import json
+#    url = api.encode("utf-8") + '/device/' + device.encode("utf-8") + '/attribute/' + cmd.encode("utf-8"))
+#    response = get(url, headers=header)
+#    return response
 
 def action_wrapper(hermes, intentMessage, conf):
     from requests import put, get
@@ -97,5 +102,5 @@ if __name__ == "__main__":
     mqtt_opts = MqttOptions()
     with Hermes(mqtt_options=mqtt_opts) as h:
 #    with Hermes("localhost:1883") as h:
-        h.subscribe_intent("hooray4me:control_devices", subscribe_intent_callback) \
+        h.subscribe_intent("hooray4me:powerToggleDevice", subscribe_intent_callback) \
          .start()
