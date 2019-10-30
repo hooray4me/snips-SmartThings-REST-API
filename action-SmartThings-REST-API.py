@@ -23,7 +23,7 @@ class Lights:
         self.start_blocking()
 
     def controlDevice_callback(self, hermes, intent_message):
-        
+
         if intent_message.slots.lights:
             light = intent_message.slots.lights.first().value
         if intent_message.slots.onOff:
@@ -36,9 +36,9 @@ class Lights:
 
         if light == "lights":
             target = "all_lights"
-        elif light == "lamps"
+        elif light == "lamps":
             target = "lamps"
-        else
+        else:
             target == "one_light"
         if target == "all_lights":
             if action == "on" or action == "off":
@@ -48,9 +48,9 @@ class Lights:
                     print header
                     response = get(uri, headers=header)
                 hermes.publish_end_session(intent_message.session_id, "Turning " + action.encode("utf-8") + " " + light.encode("utf-8"))
-        else
+        else:
             hermes.publish_end_session(intent_message.session_id, "Be boop be be boop, somethings not right")
-       
+
     def master_intent_callback(self,hermes, intent_message):
         coming_intent = intent_message.intent.intent_name
         if coming_intent == 'hooray4me:powerToggleDevice':
