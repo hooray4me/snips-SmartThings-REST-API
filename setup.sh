@@ -15,7 +15,7 @@ then
     then
         echo "Could not find Python 3.7"
     fi
-    $PYTHON -m venv $VENV
+    virtualenv -p $PYTHON $VENV
 
 fi
 
