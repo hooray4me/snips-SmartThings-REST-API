@@ -27,26 +27,9 @@ def subscribe_intent_callback(hermes, intentMessage):
     conf = read_configuration_file(CONFIG_INI)
     action_wrapper(hermes, intentMessage, conf)
 
-#def call_command_api(api, header, device, cmd):
-#    from requests import put
-#    import json
-#
-#    api = 
-#    b=header
-#    c=device
-#    d=cmd
-#    url=a.encode("utf-8") + '/device/' + c.encode("utf-8") + '/command/' + d.encode("utf-8"))
-#    response = get(url, headers=b)
-#
-#def call_attribute_api(api, header, device, cmd):
-#    from requests import get
-#    import json
-#    url = api.encode("utf-8") + '/device/' + device.encode("utf-8") + '/attribute/' + cmd.encode("utf-8"))
-#    response = get(url, headers=header)
-#    return response
 
 def action_wrapper(hermes, intentMessage, conf):
-    from requests import put, get
+    from requests import post, get
     import json
 
     current_session_id = intentMessage.session_id
@@ -64,7 +47,6 @@ def action_wrapper(hermes, intentMessage, conf):
      print header
      print myState
      print myDeviceId
-#     hermes.publish_end_session(current_session_id, myDeviceId)
      if myDeviceId == "lights":
        theTarget = "all_lights"
      if myDeviceId == "lamps":
@@ -77,31 +59,14 @@ def action_wrapper(hermes, intentMessage, conf):
            uri=myapi.encode("utf-8") + '/device/' + DeviceIDs[index] + '/command/' +myState.encode("utf-8")
            response = get(uri, headers=header)
          hermes.publish_end_session(current_session_id, "Turning " + myState.encode("utf-8") + " " + myDeviceId.encode("utf-8"))
-#     if myState != "query":
-#       url = 'http://'+ myip.encode("utf-8") + ':' + myport.encode("utf-8") + '/api/states/' + theDevice
-#       response = get(url, headers=header)
-#       if response.json()['state'] != myState:
-#         payload = json.dumps({"entity_id": theDevice})
-#         url = 'http://'+ myip.encode("utf-8") + ':' + myport.encode("utf-8") + '/api/services/homeassistant/turn_' + myState.encode("utf-8")
-#         response = post(url, headers=header, data=payload)
-#         hermes.publish_end_session(current_session_id, "Turning " + myState.encode("utf-8") + " " + myDeviceId.encode("utf-8"))
-#       else:
-#         hermes.publish_end_session(current_session_id, "Be Boop Beep. Um, " + myDeviceId.encode("utf-8") + " is already turned " + myState.encode("utf-8"))
      else:
-#       url = 'http://'+ myip.encode("utf-8") + ':' + myport.encode("utf-8") + '/api/states/' + theDevice
-#       response = get(url, headers=header)
-#       hermes.publish_end_session(current_session_id, myDeviceId.encode("utf-8") + " is " + response.json()['state'])
        hermes.publish_end_session(current_session_id, "Be boop be be boop, something has gone terribly wrong")
     except:
-#       print 'http://'+ myip.encode("utf-8") + ':' + myport.encode("utf-8") + '/api/states/' + myDeviceId.encode("utf-8")
-#       print myDeviceName.encode("utf-8")
-#       print myDeviceId.encode("utf-8")
       hermes.publish_end_session(current_session_id, "Be boop be be boop, something has gone terribly wrong")
-
 
 if __name__ == "__main__":
     mqtt_opts = MqttOptions()
-    with Hermes(mqtt_options=mqtt_opts) as h:
-#    with Hermes("localhost:1883") as h:
+#    with Hermes(mqtt_options=mqtt_opts) as h:
+    with Hermes("localhost:1883") as h:
         h.subscribe_intent("hooray4me:powerToggleDevice", subscribe_intent_callback) \
          .start()
