@@ -44,8 +44,8 @@ class Lights:
             if action == "on" or action == "off":
                 for index in range(len(DeviceIDs)):
                     uri=api.encode("utf-8") + '/device/' + DeviceIDs[index] + '/command/' + action.encode("utf-8")
-                    print url
-                    print header
+                    print(url)
+                    print(header)
                     response = get(uri, headers=header)
                 hermes.publish_end_session(intent_message.session_id, "Turning " + action.encode("utf-8") + " " + light.encode("utf-8"))
         else:
