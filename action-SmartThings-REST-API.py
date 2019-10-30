@@ -31,7 +31,7 @@ def call_command_api(api, header, device, cmd):
     from requests import put
     import json
     url = api.encode("utf-8") + '/device/' + device.encode("utf-8") + '/command/' + cmd.encode("utf-8"))
-    response = put(url, headers=header)
+    response = get(url, headers=header)
 
 def call_attribute_api(api, header, device, cmd):
     from requests import get
